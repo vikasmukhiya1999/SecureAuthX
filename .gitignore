@@ -1,0 +1,7 @@
+# Environment variables
+# Keep these files local and do not commit them.
+server/.env
+
+# Dependencies
+client/node_modules
+server/node_modules
