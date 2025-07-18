@@ -1,7 +1,9 @@
-import "./index.css";
+import { Outlet } from "react-router-dom";
 
-function App() {
-  return <></>;
+export default function App() {
+  return (
+    <main className="min-h-screen">
+      <Outlet />
+    </main>
+  );
 }
-
-export default App;
