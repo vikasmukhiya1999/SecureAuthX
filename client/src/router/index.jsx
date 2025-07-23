@@ -3,13 +3,20 @@ import App from "../App";
 import Signup from "../pages/Signup";
 import VerifyOtp from "../pages/VerifyOtp";
 import Login from "../pages/Login";
-import ProtecttedRoute from "../components/ProtectedRoute";
 import Dashboard from "../pages/Dashboard";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
+import ProtectedRoute from "../components/ProtectedRoute";
+
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
+      {
+        path: "",
+        element: <Login />,
+      },
       {
         path: "signup",
         element: <Signup />,
@@ -19,15 +26,19 @@ const router = createBrowserRouter([
         element: <VerifyOtp />,
       },
       {
-        path: "",
-        element: <Login />,
+        path: "forgot-password",
+        element: <ForgotPassword />,
+      },
+      {
+        path: "reset-password",
+        element: <ResetPassword />,
       },
       {
         path: "dashboard",
         element: (
-          <ProtecttedRoute>
+          <ProtectedRoute>
             <Dashboard />
-          </ProtecttedRoute>
+          </ProtectedRoute>
         ),
       },
     ],

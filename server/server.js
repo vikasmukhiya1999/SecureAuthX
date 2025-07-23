@@ -1,6 +1,6 @@
 import express from "express";
-import dotenv from "dotenv";
 import cors from "cors";
+import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
@@ -22,5 +22,5 @@ app.use("/api/auth", authRoutes);
 
 // Start the server and listen for incoming requests on the specified port
 app.listen(process.env.PORT, () => {
-  console.log(`Server is running at: localhost:${process.env.PORT}`);
+  console.log(`Server is running on: localhost:${process.env.PORT}`);
 });

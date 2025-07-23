@@ -8,7 +8,7 @@ export default function VerifyOtp() {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
-  const handleSumbit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const res = await axios.post("/auth/verify-otp", {
@@ -26,33 +26,30 @@ export default function VerifyOtp() {
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto">
-      <h2 className="text-xl fonst-bold mb-4">Verify Email OTP</h2>
-      <form onSubmit={handleSumbit} className="flex flex-col gap-2">
+    <div className="p-4 max-w-md mx-auto">
+      <h2 className="text-xl font-bold mb-4">Verify Email OTP</h2>
+      <form onSubmit={handleSubmit}>
         <input
           type="email"
           placeholder="Your Email"
-          className="border p-2 rounded"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          className="input"
           required
         />
         <input
           type="text"
           placeholder="Enter OTP"
-          className="border p-2 rounded"
           value={otp}
           onChange={(e) => setOtp(e.target.value)}
+          className="input mt-2"
           required
         />
-        <button
-          type="submit"
-          className="bg-green-600 text-white py-2 px-4 rounded"
-        >
+        <button type="submit" className="btn mt-4">
           Verify
         </button>
       </form>
-      {message && <p className="mt-2 text-blue-600">{message}</p>}
+      {message && <p className="mt-2 text-sm text-blue-500">{message}</p>}
     </div>
   );
 }

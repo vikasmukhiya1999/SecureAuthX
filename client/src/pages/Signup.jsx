@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { registerUser } from "../features/auth/authSlice";
+import { useNavigate } from "react-router-dom";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -13,7 +13,7 @@ export default function Signup() {
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -25,21 +25,21 @@ export default function Signup() {
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto">
+    <div className="p-4 max-w-md mx-auto">
       <h2 className="text-xl font-bold mb-4">Signup</h2>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+      <form onSubmit={handleSubmit}>
         <input
           name="name"
           placeholder="Name"
           onChange={handleChange}
-          className="border p-2 rounded"
+          className="input"
           required
         />
         <input
           name="email"
           placeholder="Email"
           onChange={handleChange}
-          className="border p-2 rounded"
+          className="input"
           required
         />
         <input
@@ -47,13 +47,10 @@ export default function Signup() {
           type="password"
           placeholder="Password"
           onChange={handleChange}
-          className="border p-2 rounded"
+          className="input"
           required
         />
-        <button
-          type="submit"
-          className="bg-blue-600 text-white py-2 px-4 rounded"
-        >
+        <button type="submit" className="btn mt-4">
           Register
         </button>
       </form>

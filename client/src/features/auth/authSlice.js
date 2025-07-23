@@ -1,41 +1,25 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "../../utils/api";
 
 export const registerUser = createAsyncThunk(
   "auth/registerUser",
-  async (data, thunkAPI) => {
-    try {
-      const res = await axios.post("/auth/register", data);
-      return res.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response.data.message || "failed to register"
-      );
-    }
+  async (data) => {
+    const res = await axios.post("/auth/register", data);
+    return res.data;
   }
 );
 
-export const loginUser = createAsyncThunk(
-  "auth/loginUser",
-  async (data, thunkAPI) => {
-    try {
-      const res = await axios.post("/auth/login", data);
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      return res.data;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response.data.message || "Login Failed"
-      );
-    }
-  }
-);
+export const loginUser = createAsyncThunk("auth/loginUser", async (data) => {
+  const res = await axios.post("/auth/login", data);
+  localStorage.setItem("token", res.data.token);
+  localStorage.setItem("user", JSON.stringify(res.data.user));
+  return res.data;
+});
 
 const initialState = {
   token: localStorage.getItem("token") || null,
   user: JSON.parse(localStorage.getItem("user")) || null,
   loading: false,
-  error: null,
 };
 
 const authSlice = createSlice({
@@ -43,8 +27,8 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
-      state.user = null;
       state.token = null;
+      state.user = null;
       localStorage.clear();
     },
   },
@@ -52,22 +36,19 @@ const authSlice = createSlice({
     builder
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(registerUser.fulfilled, (state) => {
         state.loading = false;
       })
-      .addCase(registerUser.rejected, (state, action) => {
+      .addCase(registerUser.rejected, (state) => {
         state.loading = false;
-        state.error = action.payload;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.token = action.payload.token;
         state.user = action.payload.user;
       })
       .addCase(loginUser.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
+        state.error = action.error.message;
       });
   },
 });

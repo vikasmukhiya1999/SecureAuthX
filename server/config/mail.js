@@ -27,7 +27,7 @@ const transporter = nodemailer.createTransport({
 export const sendOTP = async (email, code) => {
   // Define mail options for sending OTP
   const mailOptions = {
-    from: `"User-Auth App" <${process.env.EMAIL_USER}>`,
+    from: `"SecureAuthX" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: `Your OTP Verification Code`,
     html: `

@@ -1,37 +1,34 @@
 import bcrypt from "bcrypt";
-import User from "../models/user.js";
+import User from "../models/User.js";
 import OTP from "../models/OTP.js";
 import jwt from "jsonwebtoken";
 import { sendOTP } from "../config/mail.js";
 import {
-  generateAccesstoken,
+  generateAccessToken,
   generateRefreshToken,
 } from "../utils/generateToken.js";
+
 // Controller for user registration
 export const register = async (req, res) => {
   const { name, email, password } = req.body;
 
-  // if (!name || !email || !password) {
-  //   return res.send({ status: "failed", message: "missing Credential" });
-  // }
   try {
     // Check if a user with the given email already exists
-    const existing = await User.findOne({ email });
-    if (existing) {
+    const existingUser = await User.findOne({ email });
+    if (existingUser)
       return res.status(400).json({ message: "User already exist" });
-    }
 
     // Hash the user's password before saving
-    const hashed = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     // Create a new user instance
-    const newUser = new User({ name, email, password: hashed });
+    const newUser = new User({ name, email, password: hashedPassword });
     // Save the new user to the database
     await newUser.save();
 
     // Generate a 6-digit OTP
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     // Set OTP expiration time to 10 minutes from now
-    const expiresAt = new Date(Date.now() + 10 * 60000);
+    const expiresAt = new Date(Date.now() + 10 * 60000); // 10 mins
     // Save the OTP to the database
     await OTP.create({ email, code, expiresAt });
 
@@ -39,22 +36,20 @@ export const register = async (req, res) => {
     await sendOTP(email, code);
     res
       .status(201)
-      .json({ message: "Registered successfully, OTP sent to email" });
+      .json({ message: "Registered Successfully, OTP Sent to Email" });
   } catch (error) {
-    res.status(500).json({ message: "server error", error: error.message });
+    res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
 
 // Controller for verifying OTP
-export const verifyOTP = async (req, res) => {
+export const verifyOtp = async (req, res) => {
   const { email, code } = req.body;
 
   try {
     // Find the OTP document for the given email and code
     const otpDoc = await OTP.findOne({ email, code });
-    if (!otpDoc) {
-      return res.status(400).json({ message: "Invalid OTP" });
-    }
+    if (!otpDoc) return res.status(400).json({ message: "Invalid OTP" });
 
     // Check if the OTP has expired
     if (otpDoc.expiresAt < new Date()) {
@@ -66,12 +61,12 @@ export const verifyOTP = async (req, res) => {
     // Find the user associated with the email
     const user = await User.findOne({ email });
 
-    if (!user) {
-      return res.status(404).json({ message: "User Not Found" });
-    }
+    if (!user) return res.status(404).json({ message: "User Not Found" });
+
     // Mark the user's email as verified
     user.isVerified = true;
     await user.save();
+
     // Clean up all OTPs for the verified email
     await OTP.deleteMany({ email });
 
@@ -82,14 +77,15 @@ export const verifyOTP = async (req, res) => {
   }
 };
 
+// Controller for Login
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
     // Find the user by email
     const user = await User.findOne({ email });
-    if (!user || !email) {
-      return res.status(400).json({ message: "invalid credential" });
+    if (!user || !user.isVerified) {
+      return res.status(400).json({ message: "invalid credential or email not verified" });
     }
     // Compare the provided password with the hashed password in the database
     const isMatch = await bcrypt.compare(password, user.password);
@@ -97,14 +93,14 @@ export const login = async (req, res) => {
       res.status(400).json({ message: "Invalid email or password" });
     }
     // Generate access and refresh tokens
-    const accessToken = generateAccesstoken(user._id);
+    const accessToken = generateAccessToken(user._id);
     const refreshToken = generateRefreshToken(user._id);
 
     // Set the refresh token as an HTTP-only cookie
     res.cookie("refreshToken", refreshToken, {
       // The cookie is only accessible by the web server
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -135,13 +131,14 @@ export const refresh = async (req, res) => {
     // Verify the refresh token
     const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
     // Generate a new access token
-    const newAccessToken = generateAccesstoken(decoded.id);
+    const newAccessToken = generateAccessToken(decoded.id);
     res.status(200).json({ token: newAccessToken });
   } catch (error) {
-    res.status(403).json({ message: "Invalid or expired refresh token" });
+    res.status(403).json({ message: "Invalid refresh token" });
   }
 };
 
+// Controller for forgotPassword
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
@@ -149,10 +146,9 @@ export const forgotPassword = async (req, res) => {
     // Find the user by email and check if they are verified
     const user = await User.findOne({ email });
     if (!user || !user.isVerified) {
-      return res
-        .status(400)
-        .json({ message: "User not Found or Not Verified" });
+      return res.status(400).json({ message: "User not Found or Not Verified" });
     }
+
     // Generate a 6-digit OTP
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     // Set OTP expiration time to 10 minutes
